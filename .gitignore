@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# HyperFrames build artefacts (renders 太大不進 repo；source of truth 是 promo-video/index.html)
+promo-video/renders/
+promo-video/.hyperframes/
+
+# Landing dev artefacts
+landing/screenshots/
+landing/_screenshot.mjs
+
+# Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Vercel
+.vercel

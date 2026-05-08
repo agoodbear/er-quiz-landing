@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>急專大補帖 v2 — 醫師國考急診專科刷題系統</title>
+    <meta
+      name="description"
+      content="2,713 題急診專科考古題、21 年題庫、四段式臨床推理詳解。React + Supabase 打造，免費開源刷題平台。"
+    />
+
+    <!-- OG / Twitter -->
+    <meta property="og:title" content="急專大補帖 v2 — 急診專科刷題系統" />
+    <meta
+      property="og:description"
+      content="2,713 題、21 年題庫、四段式詳解。React + Supabase 打造的開源刷題 Web App。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./assets/og-cover.jpg" />
+    <meta property="og:url" content="https://er-quiz-app-v2.vercel.app" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Favicon (inline SVG) -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23F08C5A'/%3E%3Ctext x='50%25' y='54%25' font-family='-apple-system,system-ui' font-weight='900' font-size='20' fill='white' text-anchor='middle' dominant-baseline='middle'%3E急%3C/text%3E%3C/svg%3E"
+    />
+
+    <!-- Tailwind v3 CDN + custom config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              cream: "#FBF7EE",
+              ink: {
+                deep: "#1E3A5F",
+                mid: "#5A6478",
+                soft: "#8B92A3",
+              },
+              coral: "#F08C5A",
+              gold: "#D4A047",
+              mint: "#6BAA82",
+              warm: "#E8DFD0",
+            },
+            fontFamily: {
+              sans: ['"Noto Sans TC"', "Inter", "system-ui", "sans-serif"],
+              num: ['"Inter"', "system-ui", "sans-serif"],
+            },
+            boxShadow: {
+              card: "0 12px 32px rgba(30, 58, 95, 0.06)",
+              cardHover: "0 24px 48px rgba(30, 58, 95, 0.12)",
+              cta: "0 16px 32px rgba(240, 140, 90, 0.32)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- GSAP -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family:
+          "Noto Sans TC",
+          Inter,
+          system-ui,
+          sans-serif;
+        background:
+          radial-gradient(circle at 12% 8%, rgba(212, 160, 71, 0.06), transparent 45%),
+          radial-gradient(circle at 88% 92%, rgba(240, 140, 90, 0.05), transparent 50%),
+          #fbf7ee;
+        color: #1e3a5f;
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition:
+          opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+          transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .reveal.in {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .num-tabular {
+        font-variant-numeric: tabular-nums;
+      }
+      /* Hero CTA breathing */
+      @keyframes breath {
+        0%,
+        100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-2px) scale(1.02);
+        }
+      }
+      .breath {
+        animation: breath 3.6s ease-in-out infinite;
+      }
+      /* Floating accent shapes */
+      .blob-1,
+      .blob-2 {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(60px);
+        z-index: 0;
+        pointer-events: none;
+      }
+      .blob-1 {
+        width: 320px;
+        height: 320px;
+        background: rgba(240, 140, 90, 0.18);
+        top: -80px;
+        right: -60px;
+      }
+      .blob-2 {
+        width: 240px;
+        height: 240px;
+        background: rgba(212, 160, 71, 0.14);
+        bottom: 40px;
+        left: -40px;
+      }
+    </style>
+  </head>
+
+  <body class="antialiased">
+    <!-- ============ NAV ============ -->
+    <nav class="sticky top-0 z-40 backdrop-blur bg-cream/80 border-b border-warm/60">
+      <div class="max-w-6xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="#top" class="flex items-center gap-2.5">
+          <span
+            class="w-8 h-8 rounded-lg bg-coral text-white grid place-items-center font-black text-base"
+            >急</span
+          >
+          <span class="font-bold text-ink-deep tracking-wide">急專大補帖</span>
+          <span
+            class="font-num text-xs font-semibold text-ink-soft border border-warm rounded-full px-2 py-0.5 ml-1"
+            >v2</span
+          >
+        </a>
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-ink-mid">
+          <a href="#features" class="hover:text-ink-deep transition">六大功能</a>
+          <a href="#demo" class="hover:text-ink-deep transition">解析示範</a>
+          <a
+            href="https://github.com/agoodbear/er-quiz-app-v2"
+            target="_blank"
+            rel="noopener"
+            class="hover:text-ink-deep transition"
+            >GitHub</a
+          >
+        </div>
+        <a
+          href="https://er-quiz-app-v2.vercel.app"
+          target="_blank"
+          rel="noopener"
+          class="bg-ink-deep text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-coral transition"
+        >
+          開始刷題 →
+        </a>
+      </div>
+    </nav>
+
+    <!-- ============ HERO ============ -->
+    <header id="top" class="relative overflow-hidden">
+      <div class="blob-1"></div>
+      <div class="blob-2"></div>
+
+      <div class="max-w-6xl mx-auto px-6 lg:px-8 pt-16 lg:pt-24 pb-12 relative">
+        <!-- Eyebrow -->
+        <div
+          class="reveal inline-flex items-center gap-3 bg-white border border-warm rounded-full px-4 py-2 text-sm text-ink-mid font-medium"
+        >
+          <span class="w-2 h-2 rounded-full bg-coral"></span>
+          <span>急診專科 · 國考準備</span>
+          <span class="text-ink-soft">·</span>
+          <span class="text-ink-soft">2026 v2</span>
+        </div>
+
+        <!-- Title -->
+        <h1
+          class="reveal mt-6 text-6xl md:text-8xl lg:text-9xl font-black leading-none tracking-tight"
+          style="transition-delay: 0.05s"
+        >
+          急專<span class="text-coral">大補帖</span>
+        </h1>
+        <div
+          class="reveal mt-5 w-20 h-1 bg-gold rounded-full"
+          style="transition-delay: 0.1s"
+        ></div>
+
+        <p
+          class="reveal mt-6 text-xl md:text-2xl lg:text-3xl text-ink-mid font-medium max-w-3xl leading-snug"
+          style="transition-delay: 0.15s"
+        >
+          把 21 年題庫整理成你看得懂的版本。<br class="hidden md:inline" />
+          <span class="text-ink-deep font-semibold">2,713 題、四段式詳解、間隔複習。</span>
+        </p>
+
+        <!-- CTAs -->
+        <div
+          class="reveal mt-10 flex flex-wrap items-center gap-4"
+          style="transition-delay: 0.22s"
+        >
+          <a
+            href="https://er-quiz-app-v2.vercel.app"
+            target="_blank"
+            rel="noopener"
+            class="breath inline-flex items-center gap-3 bg-coral text-white text-lg md:text-xl font-bold px-8 py-4 rounded-full shadow-cta hover:shadow-cardHover transition"
+          >
+            立即開始刷題
+            <span class="text-xl">→</span>
+          </a>
+          <a
+            href="https://github.com/agoodbear/er-quiz-app-v2"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center gap-2 text-base font-semibold text-ink-deep px-6 py-4 rounded-full border-2 border-warm hover:border-ink-deep transition"
+          >
+            <svg
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M12 2C6.475 2 2 6.475 2 12c0 4.42 2.865 8.165 6.84 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.37-1.34-3.37-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.647.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.092.39-1.984 1.029-2.683-.103-.253-.446-1.272.097-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.699 1.028 1.591 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.917.678 1.85 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.525-4.475-10-10-10Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            看完整原始碼
+          </a>
+        </div>
+
+        <!-- Trust strip -->
+        <div
+          class="reveal mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-soft"
+          style="transition-delay: 0.3s"
+        >
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            完全免費
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            無廣告
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            開源 MIT
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            支援 PWA 離線
+          </span>
+        </div>
+
+        <!-- Promo video frame -->
+        <div
+          class="reveal mt-16 lg:mt-20 mx-auto max-w-5xl rounded-3xl overflow-hidden border border-warm shadow-card relative"
+          style="transition-delay: 0.4s"
+        >
+          <div
+            class="absolute -top-3 left-6 bg-white border border-warm rounded-full px-3 py-1 text-xs font-semibold text-coral z-10 flex items-center gap-1.5 shadow-card"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-coral"></span> 36 秒看懂
+          </div>
+          <video
+            class="block w-full h-auto"
+            autoplay
+            muted
+            loop
+            playsinline
+            poster="./assets/og-cover.jpg"
+            preload="metadata"
+          >
+            <source src="./assets/promo.webm" type="video/webm" />
+            <source src="./assets/promo.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ STATS ============ -->
+    <section class="py-16 lg:py-24 border-y border-warm/60 bg-white/60">
+      <div class="max-w-6xl mx-auto px-6 lg:px-8">
+        <div class="reveal text-center mb-12">
+          <div class="text-sm font-semibold text-coral tracking-[0.3em] uppercase">資料規模</div>
+          <h2 class="mt-3 text-4xl md:text-5xl font-black text-ink-deep">
+            21 年題庫，每題都附詳解
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          <div
+            class="reveal bg-white border border-warm rounded-3xl p-8 text-center shadow-card"
+          >
+            <div class="font-num font-extrabold text-ink-deep num-tabular leading-none flex items-baseline justify-center gap-1">
+              <span class="text-7xl lg:text-8xl" data-count="2713">0</span>
+              <span class="text-coral text-3xl lg:text-4xl">題</span>
+            </div>
+            <div class="mt-4 text-base font-medium text-ink-mid">完整考古題</div>
+          </div>
+          <div
+            class="reveal bg-white border border-warm rounded-3xl p-8 text-center shadow-card"
+            style="transition-delay: 0.08s"
+          >
+            <div class="font-num font-extrabold text-ink-deep num-tabular leading-none flex items-baseline justify-center gap-1">
+              <span class="text-7xl lg:text-8xl" data-count="21">0</span>
+              <span class="text-coral text-3xl lg:text-4xl">年</span>
+            </div>
+            <div class="mt-4 text-base font-medium text-ink-mid">94 - 114 年覆蓋</div>
+          </div>
+          <div
+            class="reveal bg-white border border-warm rounded-3xl p-8 text-center shadow-card"
+            style="transition-delay: 0.16s"
+          >
+            <div class="font-num font-extrabold text-ink-deep num-tabular leading-none flex items-baseline justify-center gap-1">
+              <span class="text-7xl lg:text-8xl" data-count="100">0</span>
+              <span class="text-coral text-3xl lg:text-4xl">%</span>
+            </div>
+            <div class="mt-4 text-base font-medium text-ink-mid">解析欄位齊全</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FEATURES ============ -->
+    <section id="features" class="py-20 lg:py-28">
+      <div class="max-w-6xl mx-auto px-6 lg:px-8">
+        <div class="reveal text-center mb-14">
+          <div class="text-sm font-semibold text-coral tracking-[0.3em] uppercase">六大功能</div>
+          <h2 class="mt-3 text-4xl md:text-6xl font-black text-ink-deep">不只是刷題</h2>
+          <p class="mt-4 text-lg text-ink-mid max-w-2xl mx-auto">
+            從練習、複習、模擬考到學習趨勢分析，把通過考試需要的工具一次都做齊。
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- 1 -->
+          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition">
+            <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-ink-deep">分類刷題</h3>
+            <p class="mt-2 text-ink-mid leading-relaxed">依 L1 / L2 主題分類練習，即時顯示每類完成率與正確率。</p>
+          </div>
+          <!-- 2 -->
+          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.05s">
+            <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.7 1 6.4 2.6"/><polyline points="21 3 21 9 15 9"/></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-ink-deep">間隔複習</h3>
+            <p class="mt-2 text-ink-mid leading-relaxed">SM-2 演算法依答題正確率與時間自動排程下一次複習。</p>
+          </div>
+          <!-- 3 -->
+          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.10s">
+            <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-ink-deep">錯題本</h3>
+            <p class="mt-2 text-ink-mid leading-relaxed">標記重點 / 錯題，集中複習高頻陷阱。</p>
+          </div>
+          <!-- 4 -->
+          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.15s">
+            <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-ink-deep">模擬考</h3>
+            <p class="mt-2 text-ink-mid leading-relaxed">限時 100 分鐘，可設定隨機 / 年份 / 科目組卷。</p>
+          </div>
+          <!-- 5 -->
+          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.20s">
+            <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16" y2="16"/></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-ink-deep">藥物快查</h3>
+            <p class="mt-2 text-ink-mid leading-relaxed">A-Z 索引，從藥物直接跳到出現過的相關題目。</p>
+          </div>
+          <!-- 6 -->
+          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.25s">
+            <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><line x1="6" y1="20" x2="6" y2="13"/><line x1="11" y1="20" x2="11" y2="9"/><line x1="16" y1="20" x2="16" y2="5"/></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-ink-deep">學習儀表板</h3>
+            <p class="mt-2 text-ink-mid leading-relaxed">圖表分析正確率、學習趨勢、各科熟練度。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DEMO ============ -->
+    <section id="demo" class="py-20 lg:py-28 bg-white/60 border-y border-warm/60">
+      <div class="max-w-6xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div class="reveal">
+          <div class="text-sm font-semibold text-coral tracking-[0.3em] uppercase">解析示範</div>
+          <h2 class="mt-3 text-4xl md:text-5xl font-black text-ink-deep leading-tight">
+            每題都附<br />四段式臨床推理
+          </h2>
+          <p class="mt-5 text-lg text-ink-mid leading-relaxed">
+            不只給你答案，更告訴你<strong class="text-ink-deep">為什麼</strong>。
+            每題都做了臨床情境分析、正確選項解析、錯誤選項分析，最後再附臨床重點，
+            讓你從一題學到一整類的題型。
+          </p>
+
+          <ul class="mt-6 space-y-3">
+            <li class="flex items-start gap-3">
+              <span class="mt-1.5 w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
+              <span class="text-ink-mid"><strong class="text-ink-deep">情境分析</strong> — 病人故事 + 關鍵線索</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1.5 w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
+              <span class="text-ink-mid"><strong class="text-ink-deep">正確選項</strong> — 為什麼這題選它</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1.5 w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
+              <span class="text-ink-mid"><strong class="text-ink-deep">錯誤選項</strong> — 每個選項哪裡錯、什麼情況才對</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-1.5 w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
+              <span class="text-ink-mid"><strong class="text-ink-deep">臨床重點</strong> — 一句話帶走核心觀念</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Mock question card -->
+        <div class="reveal" style="transition-delay: 0.1s">
+          <div class="bg-white border border-warm rounded-3xl p-7 lg:p-8 shadow-card">
+            <div class="flex flex-wrap gap-2 text-xs font-semibold text-ink-soft mb-4">
+              <span class="px-3 py-1 rounded-full bg-ink-deep/5">114 年</span>
+              <span class="px-3 py-1 rounded-full bg-ink-deep/5">心臟血管</span>
+              <span class="px-3 py-1 rounded-full bg-ink-deep/5">第 47 題</span>
+            </div>
+            <p class="text-base lg:text-lg text-ink-deep font-medium leading-relaxed">
+              65 歲男性突發胸痛 30 分鐘，ECG 顯示 II、III、aVF 導程 ST 段抬高，
+              最可能的犯罪血管為何？
+            </p>
+
+            <div class="mt-5 space-y-2">
+              <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
+                <span class="font-num font-bold text-sm w-7 h-7 rounded-full bg-ink-deep/5 text-ink-deep grid place-items-center">A</span>
+                <span class="text-sm">左前降支</span>
+              </div>
+              <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
+                <span class="font-num font-bold text-sm w-7 h-7 rounded-full bg-ink-deep/5 text-ink-deep grid place-items-center">B</span>
+                <span class="text-sm">左迴旋支</span>
+              </div>
+              <div class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-mint bg-mint/10 text-ink-deep font-medium">
+                <span class="font-num font-bold text-sm w-7 h-7 rounded-full bg-mint text-white grid place-items-center">C</span>
+                <span class="text-sm">右冠狀動脈</span>
+                <span class="ml-auto text-mint font-bold">✓</span>
+              </div>
+              <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
+                <span class="font-num font-bold text-sm w-7 h-7 rounded-full bg-ink-deep/5 text-ink-deep grid place-items-center">D</span>
+                <span class="text-sm">左主幹</span>
+              </div>
+            </div>
+
+            <div class="mt-5 bg-coral/8 border-l-4 border-coral rounded-r-lg px-4 py-3 text-sm text-ink-deep leading-relaxed">
+              <strong class="text-coral">臨床重點 ·</strong> 下壁 STEMI（II/III/aVF）約 80% 來自右冠狀動脈閉塞，常合併右心室梗塞，禁用 nitrate。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TECH ============ -->
+    <section class="py-20 lg:py-24">
+      <div class="max-w-6xl mx-auto px-6 lg:px-8">
+        <div class="reveal text-center mb-10">
+          <div class="text-sm font-semibold text-coral tracking-[0.3em] uppercase">技術棧</div>
+          <h2 class="mt-3 text-3xl md:text-4xl font-black text-ink-deep">乾淨的開源實作</h2>
+          <p class="mt-4 text-ink-mid max-w-2xl mx-auto">
+            前端 React 18 + Vite，題庫存 Supabase，部署 Vercel。所有原始碼開源在 GitHub。
+          </p>
+        </div>
+
+        <div class="reveal flex flex-wrap items-center justify-center gap-3 lg:gap-4">
+          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">React 18</span>
+          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Vite 5</span>
+          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Tailwind CSS 3</span>
+          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Supabase</span>
+          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">PWA · Workbox</span>
+          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Recharts</span>
+          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">React Router 6</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CTA ============ -->
+    <section class="py-20 lg:py-32 relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-b from-cream via-white/40 to-cream"></div>
+      <div class="max-w-4xl mx-auto px-6 lg:px-8 relative text-center">
+        <div class="reveal">
+          <div class="text-sm font-semibold text-ink-soft tracking-[0.3em] uppercase">準備好了嗎</div>
+          <h2 class="mt-4 text-5xl md:text-7xl lg:text-8xl font-black text-ink-deep leading-none tracking-tight">
+            立即<span class="text-coral">開始刷題</span>
+          </h2>
+          <p class="mt-6 text-lg lg:text-xl text-ink-mid">
+            完全免費、無廣告、開源。打開瀏覽器就能用，支援 PWA 離線。
+          </p>
+
+          <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <a
+              href="https://er-quiz-app-v2.vercel.app"
+              target="_blank"
+              rel="noopener"
+              class="breath inline-flex items-center gap-3 bg-coral text-white text-xl font-bold px-10 py-5 rounded-full shadow-cta hover:shadow-cardHover transition"
+            >
+              er-quiz-app-v2.vercel.app
+              <span class="text-2xl">→</span>
+            </a>
+          </div>
+          <div class="mt-6 text-sm text-ink-soft font-num">
+            或在 GitHub fork 一份：
+            <a
+              href="https://github.com/agoodbear/er-quiz-app-v2"
+              target="_blank"
+              rel="noopener"
+              class="font-semibold text-ink-deep hover:text-coral underline-offset-4 hover:underline"
+              >agoodbear/er-quiz-app-v2</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="border-t border-warm/60 py-10 bg-white/60">
+      <div
+        class="max-w-6xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-ink-mid"
+      >
+        <div class="flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-lg bg-coral text-white grid place-items-center font-black text-sm">急</span>
+          <span class="font-semibold text-ink-deep">急專大補帖 v2</span>
+          <span class="text-ink-soft">·</span>
+          <span>© 2026</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-1">
+          <a
+            href="https://er-quiz-app-v2.vercel.app"
+            target="_blank"
+            rel="noopener"
+            class="hover:text-ink-deep transition"
+            >App</a
+          >
+          <a
+            href="https://github.com/agoodbear/er-quiz-app-v2"
+            target="_blank"
+            rel="noopener"
+            class="hover:text-ink-deep transition"
+            >GitHub</a
+          >
+          <a
+            href="https://agoodbear.com"
+            target="_blank"
+            rel="noopener"
+            class="hover:text-ink-deep transition"
+            >急診熊心聲</a
+          >
+        </div>
+      </div>
+    </footer>
+
+    <!-- ============ JS: scroll reveal + count up ============ -->
+    <script>
+      // 1. Scroll reveal
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add("in");
+              io.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.12 },
+      );
+      document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+      // 2. Count-up on stats with GSAP when section enters
+      const statsIO = new IntersectionObserver(
+        (entries, obs) => {
+          for (const e of entries) {
+            if (!e.isIntersecting) continue;
+            e.target.querySelectorAll("[data-count]").forEach((node) => {
+              const target = parseInt(node.dataset.count, 10);
+              const proxy = { v: 0 };
+              gsap.to(proxy, {
+                v: target,
+                duration: 1.6,
+                ease: "power2.out",
+                onUpdate: () =>
+                  (node.textContent = Math.round(proxy.v).toLocaleString("en-US")),
+              });
+            });
+            obs.unobserve(e.target);
+          }
+        },
+        { threshold: 0.4 },
+      );
+      const statsSection = document.querySelector("section.py-16, section.lg\\:py-24");
+      // safer selector
+      const statsRoot = document.querySelector("[data-count]")?.closest("section");
+      if (statsRoot) statsIO.observe(statsRoot);
+
+      // 3. Hero entrance with GSAP (snappier than CSS reveal for above-the-fold)
+      window.addEventListener("DOMContentLoaded", () => {
+        const heroReveals = document.querySelectorAll("header .reveal");
+        // GSAP overrides the CSS transition for hero only
+        heroReveals.forEach((el, i) => {
+          gsap.fromTo(
+            el,
+            { y: 24, opacity: 0 },
+            {
+              y: 0,
+              opacity: 1,
+              duration: 0.9,
+              ease: "power3.out",
+              delay: i * 0.08,
+              onComplete: () => el.classList.add("in"),
+            },
+          );
+        });
+      });
+    </script>
+  </body>
+</html>

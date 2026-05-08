@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #fbf7ee;
+        font-family: "Noto Sans TC", "Inter", system-ui, sans-serif;
+        color: #1e3a5f;
+      }
+
+      /* === Tokens === */
+      :root {
+        --bg-cream: #fbf7ee;
+        --bg-card: #ffffff;
+        --ink-deep: #1e3a5f;
+        --ink-mid: #5a6478;
+        --ink-soft: #8b92a3;
+        --coral: #f08c5a;
+        --gold: #d4a047;
+        --mint: #6baa82;
+        --border-warm: #e8dfd0;
+      }
+
+      /* === Background paper === */
+      .paper {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            circle at 20% 15%,
+            rgba(212, 160, 71, 0.06),
+            transparent 55%
+          ),
+          radial-gradient(
+            circle at 85% 80%,
+            rgba(240, 140, 90, 0.05),
+            transparent 50%
+          ),
+          var(--bg-cream);
+      }
+
+      /* === Scene shared === */
+      .scene {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+      }
+      .scene-content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+      }
+
+      /* === Scene 1: Title === */
+      #s1 .scene-content {
+        justify-content: center;
+        align-items: center;
+        padding: 120px 200px;
+        gap: 32px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        background: #ffffff;
+        border: 1.5px solid var(--border-warm);
+        border-radius: 999px;
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--ink-mid);
+        letter-spacing: 0.04em;
+      }
+      .badge-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--coral);
+      }
+      .s1-title {
+        font-size: 200px;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: var(--ink-deep);
+      }
+      .s1-title .accent {
+        color: var(--coral);
+      }
+      .s1-tag {
+        font-size: 42px;
+        font-weight: 500;
+        color: var(--ink-mid);
+        letter-spacing: 0.02em;
+      }
+      .s1-rule {
+        width: 120px;
+        height: 4px;
+        background: var(--gold);
+        border-radius: 2px;
+      }
+      .s1-stamp {
+        position: absolute;
+        right: 200px;
+        bottom: 160px;
+        width: 200px;
+        height: 200px;
+        border: 4px solid var(--coral);
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: var(--coral);
+        font-weight: 800;
+        transform: rotate(-12deg);
+      }
+      .s1-stamp .stamp-num {
+        font-family: "Inter", sans-serif;
+        font-size: 64px;
+        line-height: 1;
+      }
+      .s1-stamp .stamp-label {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        margin-top: 4px;
+      }
+
+      /* === Scene 2: Numbers === */
+      #s2 .scene-content {
+        justify-content: center;
+        align-items: center;
+        padding: 100px 160px;
+        gap: 56px;
+      }
+      .s2-eyebrow {
+        font-size: 28px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        letter-spacing: 0.2em;
+      }
+      .s2-headline {
+        font-size: 76px;
+        font-weight: 700;
+        color: var(--ink-deep);
+        text-align: center;
+        line-height: 1.15;
+        max-width: 1400px;
+      }
+      .s2-grid {
+        display: flex;
+        gap: 48px;
+        margin-top: 8px;
+      }
+      .stat-card {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-warm);
+        border-radius: 24px;
+        padding: 48px 64px;
+        min-width: 380px;
+        text-align: center;
+        box-shadow: 0 16px 36px rgba(30, 58, 95, 0.08);
+      }
+      .stat-num {
+        font-family: "Inter", sans-serif;
+        font-size: 124px;
+        font-weight: 800;
+        color: var(--ink-deep);
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat-num .unit {
+        font-size: 52px;
+        color: var(--coral);
+        margin-left: 4px;
+      }
+      .stat-label {
+        font-size: 28px;
+        font-weight: 500;
+        color: var(--ink-mid);
+        margin-top: 16px;
+        letter-spacing: 0.04em;
+      }
+
+      /* === Scene 3: Features === */
+      #s3 .scene-content {
+        justify-content: center;
+        padding: 100px 140px;
+        gap: 48px;
+      }
+      #s3 .s3-header {
+        text-align: center;
+      }
+      .s3-eyebrow {
+        font-size: 26px;
+        font-weight: 500;
+        color: var(--coral);
+        letter-spacing: 0.2em;
+      }
+      .s3-title {
+        font-size: 84px;
+        font-weight: 800;
+        color: var(--ink-deep);
+        margin-top: 12px;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+      }
+      .feature {
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-warm);
+        border-radius: 24px;
+        padding: 36px 36px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        box-shadow: 0 12px 32px rgba(30, 58, 95, 0.06);
+      }
+      .feature-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: rgba(240, 140, 90, 0.12);
+        color: var(--coral);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .feature-icon svg {
+        width: 36px;
+        height: 36px;
+        stroke: currentColor;
+        stroke-width: 2;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .feature-title {
+        font-size: 34px;
+        font-weight: 700;
+        color: var(--ink-deep);
+      }
+      .feature-desc {
+        font-size: 22px;
+        font-weight: 400;
+        color: var(--ink-mid);
+        line-height: 1.5;
+      }
+
+      /* === Scene 4: Mock UI === */
+      #s4 .scene-content {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 120px;
+        gap: 64px;
+      }
+      .s4-left {
+        flex: 0 0 580px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .s4-eyebrow {
+        font-size: 24px;
+        font-weight: 500;
+        color: var(--coral);
+        letter-spacing: 0.2em;
+      }
+      .s4-title {
+        font-size: 64px;
+        font-weight: 800;
+        color: var(--ink-deep);
+        line-height: 1.1;
+      }
+      .s4-title .row {
+        display: block;
+      }
+      .s4-desc {
+        font-size: 26px;
+        color: var(--ink-mid);
+        line-height: 1.6;
+      }
+      .s4-mock {
+        flex: 0 0 1040px;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-warm);
+        border-radius: 28px;
+        padding: 44px;
+        box-shadow: 0 24px 48px rgba(30, 58, 95, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+      .mock-meta {
+        display: flex;
+        gap: 12px;
+        font-size: 18px;
+        color: var(--ink-soft);
+        font-weight: 500;
+      }
+      .mock-meta .pill {
+        padding: 6px 16px;
+        border-radius: 999px;
+        background: rgba(30, 58, 95, 0.06);
+      }
+      .mock-stem {
+        font-size: 26px;
+        line-height: 1.55;
+        color: var(--ink-deep);
+        font-weight: 500;
+      }
+      .mock-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .mock-option {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 22px;
+        border: 1.5px solid var(--border-warm);
+        border-radius: 14px;
+        font-size: 22px;
+        color: var(--ink-mid);
+      }
+      .mock-option .letter {
+        font-family: "Inter", sans-serif;
+        font-weight: 700;
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: rgba(30, 58, 95, 0.06);
+        color: var(--ink-deep);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+      .mock-option.correct {
+        background: rgba(107, 170, 130, 0.1);
+        border-color: var(--mint);
+        color: var(--ink-deep);
+      }
+      .mock-option.correct .letter {
+        background: var(--mint);
+        color: #ffffff;
+      }
+      .mock-option.correct .check {
+        margin-left: auto;
+        color: var(--mint);
+        font-size: 24px;
+        font-weight: 700;
+      }
+      .mock-explain {
+        background: rgba(240, 140, 90, 0.08);
+        border-left: 4px solid var(--coral);
+        padding: 18px 22px;
+        border-radius: 8px;
+        font-size: 20px;
+        color: var(--ink-deep);
+        line-height: 1.55;
+      }
+      .mock-explain strong {
+        color: var(--coral);
+      }
+
+      /* === Scene 5: CTA === */
+      #s5 .scene-content {
+        justify-content: center;
+        align-items: center;
+        padding: 120px 200px;
+        gap: 36px;
+        text-align: center;
+      }
+      .s5-eyebrow {
+        font-size: 28px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        letter-spacing: 0.3em;
+      }
+      .s5-title {
+        font-size: 156px;
+        font-weight: 900;
+        color: var(--ink-deep);
+        line-height: 1.05;
+        letter-spacing: -0.01em;
+      }
+      .s5-title .accent {
+        color: var(--coral);
+      }
+      .s5-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        padding: 26px 52px;
+        background: var(--coral);
+        color: #fff;
+        border-radius: 999px;
+        font-size: 38px;
+        font-weight: 700;
+        box-shadow: 0 16px 32px rgba(240, 140, 90, 0.32);
+      }
+      .s5-cta .arrow {
+        font-size: 36px;
+        line-height: 1;
+      }
+      .s5-url {
+        font-family: "Inter", sans-serif;
+        font-size: 26px;
+        color: var(--ink-mid);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        margin-top: 8px;
+      }
+      .s5-url .at {
+        color: var(--ink-soft);
+        margin: 0 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="36"
+      data-width="1920"
+      data-height="1080"
+    >
+      <!-- Persistent paper background -->
+      <div
+        id="paper"
+        class="paper clip"
+        data-start="0"
+        data-duration="36"
+        data-track-index="0"
+      ></div>
+
+      <!-- Scene 1: Title (0 - 5.4s) -->
+      <div
+        id="s1"
+        class="scene clip"
+        data-start="0"
+        data-duration="5.4"
+        data-track-index="1"
+        style="z-index: 10"
+      >
+        <div class="scene-content">
+          <div class="badge" id="s1-badge">
+            <span class="badge-dot"></span>
+            <span>急診專科 · 國考準備</span>
+          </div>
+          <div class="s1-rule" id="s1-rule"></div>
+          <h1 class="s1-title" id="s1-title">急專<span class="accent">大補帖</span></h1>
+          <p class="s1-tag" id="s1-tag">把 21 年題庫整理成你看得懂的版本</p>
+        </div>
+        <div class="s1-stamp" id="s1-stamp">
+          <div class="stamp-num">v2</div>
+          <div class="stamp-label">2026</div>
+        </div>
+      </div>
+
+      <!-- Scene 2: Numbers (5.0 - 11.4s) -->
+      <div
+        id="s2"
+        class="scene clip"
+        data-start="5.0"
+        data-duration="6.4"
+        data-track-index="2"
+        style="z-index: 11"
+      >
+        <div class="scene-content">
+          <div class="s2-eyebrow" id="s2-eyebrow">資料規模</div>
+          <h2 class="s2-headline" id="s2-headline">
+            21 年題庫，每題都附四段式詳解
+          </h2>
+          <div class="s2-grid">
+            <div class="stat-card" id="s2-card-1">
+              <div class="stat-num" id="s2-n1">2,713<span class="unit">題</span></div>
+              <div class="stat-label">完整考古題</div>
+            </div>
+            <div class="stat-card" id="s2-card-2">
+              <div class="stat-num" id="s2-n2">21<span class="unit">年</span></div>
+              <div class="stat-label">94 - 114 年覆蓋</div>
+            </div>
+            <div class="stat-card" id="s2-card-3">
+              <div class="stat-num" id="s2-n3">100<span class="unit">%</span></div>
+              <div class="stat-label">解析欄位齊全</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 3: Features (11.0 - 22.5s) -->
+      <div
+        id="s3"
+        class="scene clip"
+        data-start="11.0"
+        data-duration="11.5"
+        data-track-index="1"
+        style="z-index: 12"
+      >
+        <div class="scene-content">
+          <div class="s3-header" id="s3-header">
+            <div class="s3-eyebrow">六大功能</div>
+            <h2 class="s3-title">不只是刷題</h2>
+          </div>
+          <div class="feature-grid">
+            <div class="feature" id="f1">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              </div>
+              <div class="feature-title">分類刷題</div>
+              <div class="feature-desc">依 L1 / L2 主題練習，顯示完成率</div>
+            </div>
+            <div class="feature" id="f2">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.7 1 6.4 2.6"/><polyline points="21 3 21 9 15 9"/></svg>
+              </div>
+              <div class="feature-title">間隔複習</div>
+              <div class="feature-desc">SM-2 演算法自動排程複習</div>
+            </div>
+            <div class="feature" id="f3">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <div class="feature-title">錯題本</div>
+              <div class="feature-desc">標記重點題目，集中複習</div>
+            </div>
+            <div class="feature" id="f4">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+              </div>
+              <div class="feature-title">模擬考</div>
+              <div class="feature-desc">限時 100 分鐘，隨機 / 年份 / 科目</div>
+            </div>
+            <div class="feature" id="f5">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16" y2="16"/></svg>
+              </div>
+              <div class="feature-title">藥物快查</div>
+              <div class="feature-desc">A-Z 索引，找到相關題目</div>
+            </div>
+            <div class="feature" id="f6">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24"><line x1="3" y1="20" x2="21" y2="20"/><line x1="6" y1="20" x2="6" y2="13"/><line x1="11" y1="20" x2="11" y2="9"/><line x1="16" y1="20" x2="16" y2="5"/></svg>
+              </div>
+              <div class="feature-title">學習儀表板</div>
+              <div class="feature-desc">圖表分析正確率、學習趨勢</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 4: Mock UI (22.1 - 30.5s) -->
+      <div
+        id="s4"
+        class="scene clip"
+        data-start="22.1"
+        data-duration="8.4"
+        data-track-index="2"
+        style="z-index: 13"
+      >
+        <div class="scene-content">
+          <div class="s4-left">
+            <div class="s4-eyebrow" id="s4-eyebrow">解析示範</div>
+            <h2 class="s4-title" id="s4-title"><span class="row">每題四段式</span><span class="row">臨床推理</span></h2>
+            <p class="s4-desc" id="s4-desc">
+              情境分析 · 正確選項 ·<br/>錯誤選項 · 臨床重點
+            </p>
+          </div>
+          <div class="s4-mock" id="s4-mock">
+            <div class="mock-meta" id="m-meta">
+              <span class="pill">114 年</span>
+              <span class="pill">心臟血管</span>
+              <span class="pill">第 47 題</span>
+            </div>
+            <div class="mock-stem" id="m-stem">
+              65 歲男性突發胸痛 30 分鐘，ECG 顯示 II、III、aVF 導程 ST 段抬高，最可能的犯罪血管為何？
+            </div>
+            <div class="mock-options">
+              <div class="mock-option" id="m-opt-a"><span class="letter">A</span><span>左前降支</span></div>
+              <div class="mock-option" id="m-opt-b"><span class="letter">B</span><span>左迴旋支</span></div>
+              <div class="mock-option correct" id="m-opt-c"><span class="letter">C</span><span>右冠狀動脈</span><span class="check">✓</span></div>
+              <div class="mock-option" id="m-opt-d"><span class="letter">D</span><span>左主幹</span></div>
+            </div>
+            <div class="mock-explain" id="m-explain">
+              <strong>臨床重點 ·</strong> 下壁 STEMI（II/III/aVF）約 80% 來自右冠狀動脈閉塞，常合併右心室梗塞，禁用 nitrate。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scene 5: CTA (30.1 - 36.0s) -->
+      <div
+        id="s5"
+        class="scene clip"
+        data-start="30.1"
+        data-duration="5.9"
+        data-track-index="1"
+        style="z-index: 14"
+      >
+        <div class="scene-content">
+          <div class="s5-eyebrow" id="s5-eyebrow">準備好了嗎</div>
+          <h2 class="s5-title" id="s5-title">立即<span class="accent">開始刷題</span></h2>
+          <div class="s5-cta" id="s5-cta">
+            <span>er-quiz-app-v2.vercel.app</span>
+            <span class="arrow">→</span>
+          </div>
+          <div class="s5-url" id="s5-foot">
+            agoodbear<span class="at">/</span>er-quiz-app-v2<span class="at">·</span>open source on GitHub
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* ===================== Scene 1 (0 - 5.4s) ===================== */
+      tl.from("#s1", { opacity: 0, duration: 0.5, ease: "power2.out" }, 0.0);
+      tl.from("#s1-badge", { y: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.3);
+      tl.from(
+        "#s1-rule",
+        { scaleX: 0, transformOrigin: "left center", duration: 0.6, ease: "expo.out" },
+        0.5,
+      );
+      tl.from("#s1-title", { y: 80, opacity: 0, duration: 0.9, ease: "expo.out" }, 0.6);
+      tl.from("#s1-tag", { y: 30, opacity: 0, duration: 0.6, ease: "power3.out" }, 1.0);
+      tl.from(
+        "#s1-stamp",
+        { scale: 0, rotation: -180, opacity: 0, duration: 0.7, ease: "back.out(1.6)" },
+        1.4,
+      );
+
+      /* ===================== Scene 2 (5.0 - 11.4s) ===================== */
+      tl.from("#s2", { opacity: 0, duration: 0.5, ease: "power2.out" }, 5.0);
+      tl.from("#s2-eyebrow", { y: 20, opacity: 0, duration: 0.5, ease: "power3.out" }, 5.3);
+      tl.from("#s2-headline", { y: 40, opacity: 0, duration: 0.7, ease: "expo.out" }, 5.5);
+
+      // Stat cards stagger in
+      tl.from(
+        ["#s2-card-1", "#s2-card-2", "#s2-card-3"],
+        { y: 60, opacity: 0, duration: 0.6, ease: "back.out(1.4)", stagger: 0.12 },
+        6.1,
+      );
+
+      // Number count-up
+      const countUp = (selector, end, duration, suffix) => {
+        const el = document.querySelector(selector);
+        const proxy = { v: 0 };
+        return gsap.to(proxy, {
+          v: end,
+          duration,
+          ease: "power2.out",
+          onUpdate: () => {
+            const n = Math.round(proxy.v).toLocaleString("en-US");
+            el.innerHTML = `${n}<span class="unit">${suffix}</span>`;
+          },
+        });
+      };
+      tl.add(countUp("#s2-n1", 2713, 1.6, "題"), 6.5);
+      tl.add(countUp("#s2-n2", 21, 1.2, "年"), 6.7);
+      tl.add(countUp("#s2-n3", 100, 1.4, "%"), 6.9);
+
+      /* ===================== Scene 3 (11.0 - 22.5s) ===================== */
+      tl.from("#s3", { opacity: 0, duration: 0.5, ease: "power2.out" }, 11.0);
+      tl.from("#s3-header", { y: 30, opacity: 0, duration: 0.6, ease: "power3.out" }, 11.3);
+
+      // 6 features stagger
+      tl.from(
+        ["#f1", "#f2", "#f3", "#f4", "#f5", "#f6"],
+        {
+          y: 60,
+          opacity: 0,
+          duration: 0.55,
+          ease: "back.out(1.3)",
+          stagger: 0.13,
+        },
+        12.0,
+      );
+      // Subtle icon pop AFTER each card lands
+      ["#f1", "#f2", "#f3", "#f4", "#f5", "#f6"].forEach((sel, i) => {
+        tl.from(
+          `${sel} .feature-icon`,
+          { scale: 0.6, rotation: -8, duration: 0.35, ease: "back.out(2)" },
+          12.2 + i * 0.13,
+        );
+      });
+
+      /* ===================== Scene 4 (22.1 - 30.5s) ===================== */
+      tl.from("#s4", { opacity: 0, duration: 0.5, ease: "power2.out" }, 22.1);
+      tl.from("#s4-eyebrow", { y: 20, opacity: 0, duration: 0.4, ease: "power3.out" }, 22.4);
+      tl.from("#s4-title", { y: 40, opacity: 0, duration: 0.6, ease: "expo.out" }, 22.5);
+      tl.from("#s4-desc", { y: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, 22.8);
+
+      tl.from(
+        "#s4-mock",
+        { x: 80, opacity: 0, duration: 0.7, ease: "expo.out" },
+        22.7,
+      );
+      tl.from(
+        "#m-meta .pill",
+        { y: 16, opacity: 0, duration: 0.4, stagger: 0.08, ease: "power3.out" },
+        23.4,
+      );
+      tl.from("#m-stem", { y: 20, opacity: 0, duration: 0.5, ease: "power3.out" }, 23.7);
+
+      // Options stagger in
+      tl.from(
+        ["#m-opt-a", "#m-opt-b", "#m-opt-c", "#m-opt-d"],
+        { x: -30, opacity: 0, duration: 0.4, ease: "power3.out", stagger: 0.12 },
+        24.2,
+      );
+
+      // Reveal correct answer styling
+      tl.fromTo(
+        "#m-opt-c",
+        { backgroundColor: "rgba(255,255,255,0)", borderColor: "#E8DFD0" },
+        {
+          backgroundColor: "rgba(107, 170, 130, 0.1)",
+          borderColor: "#6BAA82",
+          duration: 0.6,
+          ease: "power2.out",
+        },
+        25.4,
+      );
+      tl.from(
+        "#m-opt-c .check",
+        { scale: 0, rotation: -90, opacity: 0, duration: 0.5, ease: "back.out(2)" },
+        25.6,
+      );
+
+      // Explanation reveals
+      tl.from(
+        "#m-explain",
+        { y: 30, opacity: 0, duration: 0.6, ease: "power3.out" },
+        26.4,
+      );
+
+      /* ===================== Scene 5 (30.1 - 36.0s) — CTA ===================== */
+      tl.from("#s5", { opacity: 0, duration: 0.5, ease: "power2.out" }, 30.1);
+      tl.from("#s5-eyebrow", { y: 20, opacity: 0, duration: 0.4, ease: "power3.out" }, 30.4);
+      tl.from("#s5-title", { y: 60, opacity: 0, duration: 0.8, ease: "expo.out" }, 30.6);
+      tl.from(
+        "#s5-cta",
+        { y: 40, scale: 0.85, opacity: 0, duration: 0.7, ease: "back.out(1.5)" },
+        31.2,
+      );
+      tl.from("#s5-foot", { y: 20, opacity: 0, duration: 0.5, ease: "power3.out" }, 31.6);
+
+      // Subtle CTA breathing pulse (finite repeat, no -1)
+      tl.to(
+        "#s5-cta",
+        {
+          scale: 1.04,
+          duration: 0.9,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: 3,
+        },
+        32.0,
+      );
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
