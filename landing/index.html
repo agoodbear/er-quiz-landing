@@ -20,7 +20,7 @@
     <meta property="og:url" content="https://er-quiz-app-v2.vercel.app" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- Favicon (inline SVG) -->
+    <!-- Favicon -->
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23F08C5A'/%3E%3Ctext x='50%25' y='54%25' font-family='-apple-system,system-ui' font-weight='900' font-size='20' fill='white' text-anchor='middle' dominant-baseline='middle'%3E急%3C/text%3E%3C/svg%3E"
@@ -34,11 +34,7 @@
           extend: {
             colors: {
               cream: "#FBF7EE",
-              ink: {
-                deep: "#1E3A5F",
-                mid: "#5A6478",
-                soft: "#8B92A3",
-              },
+              ink: { deep: "#1E3A5F", mid: "#5A6478", soft: "#8B92A3" },
               coral: "#F08C5A",
               gold: "#D4A047",
               mint: "#6BAA82",
@@ -52,6 +48,7 @@
               card: "0 12px 32px rgba(30, 58, 95, 0.06)",
               cardHover: "0 24px 48px rgba(30, 58, 95, 0.12)",
               cta: "0 16px 32px rgba(240, 140, 90, 0.32)",
+              ctaHover: "0 24px 48px rgba(240, 140, 90, 0.42)",
             },
           },
         },
@@ -66,8 +63,9 @@
       rel="stylesheet"
     />
 
-    <!-- GSAP -->
+    <!-- GSAP + ScrollTrigger -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/ScrollTrigger.min.js"></script>
 
     <style>
       html {
@@ -80,67 +78,173 @@
           system-ui,
           sans-serif;
         background:
-          radial-gradient(circle at 12% 8%, rgba(212, 160, 71, 0.06), transparent 45%),
-          radial-gradient(circle at 88% 92%, rgba(240, 140, 90, 0.05), transparent 50%),
+          radial-gradient(circle at 12% 8%, rgba(212, 160, 71, 0.07), transparent 45%),
+          radial-gradient(circle at 88% 92%, rgba(240, 140, 90, 0.06), transparent 50%),
           #fbf7ee;
         color: #1e3a5f;
+        overflow-x: hidden;
       }
-      .reveal {
-        opacity: 0;
-        transform: translateY(24px);
-        transition:
-          opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
-          transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+      /* === Grain overlay — Linear-style noise === */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.04;
+        mix-blend-mode: multiply;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
       }
-      .reveal.in {
-        opacity: 1;
-        transform: translateY(0);
+
+      /* === Hero title char === */
+      .hero-char {
+        display: inline-block;
+        will-change: transform, opacity;
       }
+
+      /* === Stats / number tabular === */
       .num-tabular {
         font-variant-numeric: tabular-nums;
       }
-      /* Hero CTA breathing */
-      @keyframes breath {
-        0%,
-        100% {
-          transform: translateY(0) scale(1);
-        }
-        50% {
-          transform: translateY(-2px) scale(1.02);
-        }
+
+      /* === Feature card 3D === */
+      .feat {
+        transform-style: preserve-3d;
+        transition:
+          box-shadow 0.4s ease,
+          transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        will-change: transform;
       }
-      .breath {
-        animation: breath 3.6s ease-in-out infinite;
+      .feat:hover {
+        transform: translateY(-6px) scale(1.015);
       }
-      /* Floating accent shapes */
-      .blob-1,
-      .blob-2 {
-        position: absolute;
-        border-radius: 999px;
-        filter: blur(60px);
-        z-index: 0;
+      .feat:hover .feat-icon {
+        transform: scale(1.08) rotate(-4deg);
+      }
+      .feat-icon {
+        transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      /* === Magnetic CTA button === */
+      .magnetic {
+        will-change: transform;
+        transition: box-shadow 0.3s ease;
+      }
+      .magnetic-inner {
+        display: inline-block;
         pointer-events: none;
       }
+
+      /* === Hero video frame parallax === */
+      .video-frame {
+        will-change: transform;
+        transform-style: preserve-3d;
+        perspective: 1200px;
+      }
+      .video-frame video {
+        backface-visibility: hidden;
+        transform: translateZ(0);
+      }
+
+      /* === Floating accent shapes === */
+      .blob {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(72px);
+        z-index: 0;
+        pointer-events: none;
+        will-change: transform;
+      }
       .blob-1 {
-        width: 320px;
-        height: 320px;
-        background: rgba(240, 140, 90, 0.18);
-        top: -80px;
-        right: -60px;
+        width: 380px;
+        height: 380px;
+        background: rgba(240, 140, 90, 0.22);
+        top: -100px;
+        right: -80px;
       }
       .blob-2 {
-        width: 240px;
-        height: 240px;
-        background: rgba(212, 160, 71, 0.14);
-        bottom: 40px;
-        left: -40px;
+        width: 280px;
+        height: 280px;
+        background: rgba(212, 160, 71, 0.18);
+        bottom: 60px;
+        left: -60px;
+      }
+      .blob-3 {
+        width: 320px;
+        height: 320px;
+        background: rgba(107, 170, 130, 0.14);
+        top: 50%;
+        left: 30%;
+        filter: blur(96px);
+      }
+
+      /* === Demo card "answered" state pulse === */
+      @keyframes correct-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(107, 170, 130, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(107, 170, 130, 0);
+        }
+      }
+      .correct-flash {
+        animation: correct-pulse 1.6s ease-out 1;
+      }
+
+      /* === CTA glow for final hero === */
+      .cta-glow {
+        position: relative;
+      }
+      .cta-glow::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        border-radius: 999px;
+        background: linear-gradient(120deg, #f08c5a, #d4a047, #f08c5a);
+        background-size: 200% 200%;
+        z-index: -1;
+        opacity: 0.5;
+        filter: blur(8px);
+        animation: glow-shift 4s ease-in-out infinite;
+      }
+      @keyframes glow-shift {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      /* === Hide initial state from FOUC === */
+      .pre-anim {
+        opacity: 0;
+      }
+
+      /* Reduced motion respect */
+      @media (prefers-reduced-motion: reduce) {
+        .pre-anim {
+          opacity: 1 !important;
+        }
+        .blob {
+          display: none;
+        }
+        body::after {
+          display: none;
+        }
       }
     </style>
   </head>
 
   <body class="antialiased">
     <!-- ============ NAV ============ -->
-    <nav class="sticky top-0 z-40 backdrop-blur bg-cream/80 border-b border-warm/60">
+    <nav
+      id="nav"
+      class="sticky top-0 z-40 backdrop-blur bg-cream/80 border-b border-warm/60"
+    >
       <div class="max-w-6xl mx-auto px-6 lg:px-8 h-16 flex items-center justify-between">
         <a href="#top" class="flex items-center gap-2.5">
           <span
@@ -177,13 +281,14 @@
 
     <!-- ============ HERO ============ -->
     <header id="top" class="relative overflow-hidden">
-      <div class="blob-1"></div>
-      <div class="blob-2"></div>
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
 
-      <div class="max-w-6xl mx-auto px-6 lg:px-8 pt-16 lg:pt-24 pb-12 relative">
+      <div class="max-w-6xl mx-auto px-6 lg:px-8 pt-16 lg:pt-24 pb-16 relative">
         <!-- Eyebrow -->
         <div
-          class="reveal inline-flex items-center gap-3 bg-white border border-warm rounded-full px-4 py-2 text-sm text-ink-mid font-medium"
+          id="hero-eyebrow"
+          class="pre-anim inline-flex items-center gap-3 bg-white border border-warm rounded-full px-4 py-2 text-sm text-ink-mid font-medium shadow-card"
         >
           <span class="w-2 h-2 rounded-full bg-coral"></span>
           <span>急診專科 · 國考準備</span>
@@ -191,81 +296,78 @@
           <span class="text-ink-soft">2026 v2</span>
         </div>
 
-        <!-- Title -->
+        <!-- Title (per-char) -->
         <h1
-          class="reveal mt-6 text-6xl md:text-8xl lg:text-9xl font-black leading-none tracking-tight"
-          style="transition-delay: 0.05s"
+          id="hero-title"
+          class="mt-6 text-6xl md:text-8xl lg:text-9xl font-black leading-none tracking-tight"
         >
-          急專<span class="text-coral">大補帖</span>
+          <span class="hero-char pre-anim">急</span><span class="hero-char pre-anim">專</span><span class="hero-char pre-anim text-coral">大</span><span class="hero-char pre-anim text-coral">補</span><span class="hero-char pre-anim text-coral">帖</span>
         </h1>
-        <div
-          class="reveal mt-5 w-20 h-1 bg-gold rounded-full"
-          style="transition-delay: 0.1s"
-        ></div>
+        <div id="hero-rule" class="pre-anim mt-5 w-20 h-1 bg-gold rounded-full origin-left"></div>
 
         <p
-          class="reveal mt-6 text-xl md:text-2xl lg:text-3xl text-ink-mid font-medium max-w-3xl leading-snug"
-          style="transition-delay: 0.15s"
+          id="hero-tag"
+          class="pre-anim mt-6 text-xl md:text-2xl lg:text-3xl text-ink-mid font-medium max-w-3xl leading-snug"
         >
           把 21 年題庫整理成你看得懂的版本。<br class="hidden md:inline" />
           <span class="text-ink-deep font-semibold">2,713 題、四段式詳解、間隔複習。</span>
         </p>
 
         <!-- CTAs -->
-        <div
-          class="reveal mt-10 flex flex-wrap items-center gap-4"
-          style="transition-delay: 0.22s"
-        >
+        <div id="hero-cta-row" class="mt-10 flex flex-wrap items-center gap-4">
           <a
+            id="hero-cta-primary"
             href="https://er-quiz-app-v2.vercel.app"
             target="_blank"
             rel="noopener"
-            class="breath inline-flex items-center gap-3 bg-coral text-white text-lg md:text-xl font-bold px-8 py-4 rounded-full shadow-cta hover:shadow-cardHover transition"
+            class="pre-anim magnetic inline-flex items-center gap-3 bg-coral text-white text-lg md:text-xl font-bold px-8 py-4 rounded-full shadow-cta hover:shadow-ctaHover transition"
           >
-            立即開始刷題
-            <span class="text-xl">→</span>
+            <span class="magnetic-inner flex items-center gap-3">
+              立即開始刷題
+              <span class="text-xl">→</span>
+            </span>
           </a>
           <a
+            id="hero-cta-secondary"
             href="https://github.com/agoodbear/er-quiz-app-v2"
             target="_blank"
             rel="noopener"
-            class="inline-flex items-center gap-2 text-base font-semibold text-ink-deep px-6 py-4 rounded-full border-2 border-warm hover:border-ink-deep transition"
+            class="pre-anim magnetic inline-flex items-center gap-2 text-base font-semibold text-ink-deep px-6 py-4 rounded-full border-2 border-warm hover:border-ink-deep transition"
           >
-            <svg
-              class="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M12 2C6.475 2 2 6.475 2 12c0 4.42 2.865 8.165 6.84 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.37-1.34-3.37-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.647.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.092.39-1.984 1.029-2.683-.103-.253-.446-1.272.097-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.699 1.028 1.591 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.917.678 1.85 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.525-4.475-10-10-10Z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            看完整原始碼
+            <span class="magnetic-inner flex items-center gap-2">
+              <svg
+                class="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M12 2C6.475 2 2 6.475 2 12c0 4.42 2.865 8.165 6.84 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.37-1.34-3.37-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.647.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.092.39-1.984 1.029-2.683-.103-.253-.446-1.272.097-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.699 1.028 1.591 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.917.678 1.85 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.525-4.475-10-10-10Z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              看完整原始碼
+            </span>
           </a>
         </div>
 
         <!-- Trust strip -->
-        <div
-          class="reveal mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-soft"
-          style="transition-delay: 0.3s"
-        >
-          <span class="flex items-center gap-1.5">
+        <div id="hero-trust-row" class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-soft">
+          <span class="hero-trust pre-anim flex items-center gap-1.5">
             <svg class="w-4 h-4 text-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             完全免費
           </span>
-          <span class="flex items-center gap-1.5">
+          <span class="hero-trust pre-anim flex items-center gap-1.5">
             <svg class="w-4 h-4 text-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             無廣告
           </span>
-          <span class="flex items-center gap-1.5">
+          <span class="hero-trust pre-anim flex items-center gap-1.5">
             <svg class="w-4 h-4 text-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             開源 MIT
           </span>
-          <span class="flex items-center gap-1.5">
+          <span class="hero-trust pre-anim flex items-center gap-1.5">
             <svg class="w-4 h-4 text-mint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             支援 PWA 離線
           </span>
@@ -273,64 +375,60 @@
 
         <!-- Promo video frame -->
         <div
-          class="reveal mt-16 lg:mt-20 mx-auto max-w-5xl rounded-3xl overflow-hidden border border-warm shadow-card relative"
-          style="transition-delay: 0.4s"
+          id="hero-video"
+          class="pre-anim mt-16 lg:mt-20 mx-auto max-w-5xl video-frame relative"
         >
           <div
-            class="absolute -top-3 left-6 bg-white border border-warm rounded-full px-3 py-1 text-xs font-semibold text-coral z-10 flex items-center gap-1.5 shadow-card"
+            class="rounded-3xl overflow-hidden border border-warm shadow-card relative bg-white"
           >
-            <span class="w-1.5 h-1.5 rounded-full bg-coral"></span> 36 秒看懂
+            <div
+              class="absolute -top-3 left-6 bg-white border border-warm rounded-full px-3 py-1 text-xs font-semibold text-coral z-10 flex items-center gap-1.5 shadow-card"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-coral"></span> 36 秒看懂
+            </div>
+            <video
+              class="block w-full h-auto"
+              autoplay
+              muted
+              loop
+              playsinline
+              poster="./assets/og-cover.jpg"
+              preload="metadata"
+            >
+              <source src="./assets/promo.webm" type="video/webm" />
+              <source src="./assets/promo.mp4" type="video/mp4" />
+            </video>
           </div>
-          <video
-            class="block w-full h-auto"
-            autoplay
-            muted
-            loop
-            playsinline
-            poster="./assets/og-cover.jpg"
-            preload="metadata"
-          >
-            <source src="./assets/promo.webm" type="video/webm" />
-            <source src="./assets/promo.mp4" type="video/mp4" />
-          </video>
         </div>
       </div>
     </header>
 
     <!-- ============ STATS ============ -->
-    <section class="py-16 lg:py-24 border-y border-warm/60 bg-white/60">
+    <section id="stats" class="stats-section py-16 lg:py-24 border-y border-warm/60 bg-white/60 relative">
       <div class="max-w-6xl mx-auto px-6 lg:px-8">
-        <div class="reveal text-center mb-12">
-          <div class="text-sm font-semibold text-coral tracking-[0.3em] uppercase">資料規模</div>
-          <h2 class="mt-3 text-4xl md:text-5xl font-black text-ink-deep">
+        <div class="text-center mb-12">
+          <div id="stats-eyebrow" class="pre-anim text-sm font-semibold text-coral tracking-[0.3em] uppercase">資料規模</div>
+          <h2 id="stats-title" class="pre-anim mt-3 text-4xl md:text-5xl font-black text-ink-deep">
             21 年題庫，每題都附詳解
           </h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          <div
-            class="reveal bg-white border border-warm rounded-3xl p-8 text-center shadow-card"
-          >
+          <div class="stat-card pre-anim bg-white border border-warm rounded-3xl p-8 text-center shadow-card relative overflow-hidden">
             <div class="font-num font-extrabold text-ink-deep num-tabular leading-none flex items-baseline justify-center gap-1">
               <span class="text-7xl lg:text-8xl" data-count="2713">0</span>
               <span class="text-coral text-3xl lg:text-4xl">題</span>
             </div>
             <div class="mt-4 text-base font-medium text-ink-mid">完整考古題</div>
           </div>
-          <div
-            class="reveal bg-white border border-warm rounded-3xl p-8 text-center shadow-card"
-            style="transition-delay: 0.08s"
-          >
+          <div class="stat-card pre-anim bg-white border border-warm rounded-3xl p-8 text-center shadow-card relative overflow-hidden">
             <div class="font-num font-extrabold text-ink-deep num-tabular leading-none flex items-baseline justify-center gap-1">
               <span class="text-7xl lg:text-8xl" data-count="21">0</span>
               <span class="text-coral text-3xl lg:text-4xl">年</span>
             </div>
             <div class="mt-4 text-base font-medium text-ink-mid">94 - 114 年覆蓋</div>
           </div>
-          <div
-            class="reveal bg-white border border-warm rounded-3xl p-8 text-center shadow-card"
-            style="transition-delay: 0.16s"
-          >
+          <div class="stat-card pre-anim bg-white border border-warm rounded-3xl p-8 text-center shadow-card relative overflow-hidden">
             <div class="font-num font-extrabold text-ink-deep num-tabular leading-none flex items-baseline justify-center gap-1">
               <span class="text-7xl lg:text-8xl" data-count="100">0</span>
               <span class="text-coral text-3xl lg:text-4xl">%</span>
@@ -342,19 +440,20 @@
     </section>
 
     <!-- ============ FEATURES ============ -->
-    <section id="features" class="py-20 lg:py-28">
-      <div class="max-w-6xl mx-auto px-6 lg:px-8">
-        <div class="reveal text-center mb-14">
-          <div class="text-sm font-semibold text-coral tracking-[0.3em] uppercase">六大功能</div>
-          <h2 class="mt-3 text-4xl md:text-6xl font-black text-ink-deep">不只是刷題</h2>
-          <p class="mt-4 text-lg text-ink-mid max-w-2xl mx-auto">
+    <section id="features" class="features-section py-20 lg:py-28 relative">
+      <div class="blob blob-3"></div>
+      <div class="max-w-6xl mx-auto px-6 lg:px-8 relative">
+        <div class="text-center mb-14">
+          <div id="feat-eyebrow" class="pre-anim text-sm font-semibold text-coral tracking-[0.3em] uppercase">六大功能</div>
+          <h2 id="feat-title" class="pre-anim mt-3 text-4xl md:text-6xl font-black text-ink-deep">不只是刷題</h2>
+          <p id="feat-desc" class="pre-anim mt-4 text-lg text-ink-mid max-w-2xl mx-auto">
             從練習、複習、模擬考到學習趨勢分析，把通過考試需要的工具一次都做齊。
           </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- 1 -->
-          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition">
+          <div class="feat pre-anim bg-white border border-warm rounded-3xl p-8 shadow-card">
             <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
               <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
             </div>
@@ -362,7 +461,7 @@
             <p class="mt-2 text-ink-mid leading-relaxed">依 L1 / L2 主題分類練習，即時顯示每類完成率與正確率。</p>
           </div>
           <!-- 2 -->
-          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.05s">
+          <div class="feat pre-anim bg-white border border-warm rounded-3xl p-8 shadow-card">
             <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
               <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.7 1 6.4 2.6"/><polyline points="21 3 21 9 15 9"/></svg>
             </div>
@@ -370,7 +469,7 @@
             <p class="mt-2 text-ink-mid leading-relaxed">SM-2 演算法依答題正確率與時間自動排程下一次複習。</p>
           </div>
           <!-- 3 -->
-          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.10s">
+          <div class="feat pre-anim bg-white border border-warm rounded-3xl p-8 shadow-card">
             <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
               <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
             </div>
@@ -378,7 +477,7 @@
             <p class="mt-2 text-ink-mid leading-relaxed">標記重點 / 錯題，集中複習高頻陷阱。</p>
           </div>
           <!-- 4 -->
-          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.15s">
+          <div class="feat pre-anim bg-white border border-warm rounded-3xl p-8 shadow-card">
             <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
               <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
             </div>
@@ -386,7 +485,7 @@
             <p class="mt-2 text-ink-mid leading-relaxed">限時 100 分鐘，可設定隨機 / 年份 / 科目組卷。</p>
           </div>
           <!-- 5 -->
-          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.20s">
+          <div class="feat pre-anim bg-white border border-warm rounded-3xl p-8 shadow-card">
             <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
               <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16" y2="16"/></svg>
             </div>
@@ -394,7 +493,7 @@
             <p class="mt-2 text-ink-mid leading-relaxed">A-Z 索引，從藥物直接跳到出現過的相關題目。</p>
           </div>
           <!-- 6 -->
-          <div class="reveal feat group bg-white border border-warm rounded-3xl p-8 shadow-card hover:shadow-cardHover transition" style="transition-delay: 0.25s">
+          <div class="feat pre-anim bg-white border border-warm rounded-3xl p-8 shadow-card">
             <div class="feat-icon w-14 h-14 rounded-2xl bg-coral/10 text-coral grid place-items-center mb-5">
               <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><line x1="6" y1="20" x2="6" y2="13"/><line x1="11" y1="20" x2="11" y2="9"/><line x1="16" y1="20" x2="16" y2="5"/></svg>
             </div>
@@ -406,73 +505,73 @@
     </section>
 
     <!-- ============ DEMO ============ -->
-    <section id="demo" class="py-20 lg:py-28 bg-white/60 border-y border-warm/60">
+    <section id="demo" class="demo-section py-20 lg:py-28 bg-white/60 border-y border-warm/60 relative">
       <div class="max-w-6xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <div class="reveal">
-          <div class="text-sm font-semibold text-coral tracking-[0.3em] uppercase">解析示範</div>
-          <h2 class="mt-3 text-4xl md:text-5xl font-black text-ink-deep leading-tight">
+        <div class="demo-text">
+          <div id="demo-eyebrow" class="pre-anim text-sm font-semibold text-coral tracking-[0.3em] uppercase">解析示範</div>
+          <h2 id="demo-title" class="pre-anim mt-3 text-4xl md:text-5xl font-black text-ink-deep leading-tight">
             每題都附<br />四段式臨床推理
           </h2>
-          <p class="mt-5 text-lg text-ink-mid leading-relaxed">
+          <p id="demo-desc" class="pre-anim mt-5 text-lg text-ink-mid leading-relaxed">
             不只給你答案，更告訴你<strong class="text-ink-deep">為什麼</strong>。
             每題都做了臨床情境分析、正確選項解析、錯誤選項分析，最後再附臨床重點，
             讓你從一題學到一整類的題型。
           </p>
 
-          <ul class="mt-6 space-y-3">
-            <li class="flex items-start gap-3">
+          <ul id="demo-list" class="mt-6 space-y-3">
+            <li class="demo-bullet pre-anim flex items-start gap-3">
               <span class="mt-1.5 w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
               <span class="text-ink-mid"><strong class="text-ink-deep">情境分析</strong> — 病人故事 + 關鍵線索</span>
             </li>
-            <li class="flex items-start gap-3">
+            <li class="demo-bullet pre-anim flex items-start gap-3">
               <span class="mt-1.5 w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
               <span class="text-ink-mid"><strong class="text-ink-deep">正確選項</strong> — 為什麼這題選它</span>
             </li>
-            <li class="flex items-start gap-3">
+            <li class="demo-bullet pre-anim flex items-start gap-3">
               <span class="mt-1.5 w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
               <span class="text-ink-mid"><strong class="text-ink-deep">錯誤選項</strong> — 每個選項哪裡錯、什麼情況才對</span>
             </li>
-            <li class="flex items-start gap-3">
+            <li class="demo-bullet pre-anim flex items-start gap-3">
               <span class="mt-1.5 w-2 h-2 rounded-full bg-coral flex-shrink-0"></span>
               <span class="text-ink-mid"><strong class="text-ink-deep">臨床重點</strong> — 一句話帶走核心觀念</span>
             </li>
           </ul>
         </div>
 
-        <!-- Mock question card -->
-        <div class="reveal" style="transition-delay: 0.1s">
-          <div class="bg-white border border-warm rounded-3xl p-7 lg:p-8 shadow-card">
-            <div class="flex flex-wrap gap-2 text-xs font-semibold text-ink-soft mb-4">
-              <span class="px-3 py-1 rounded-full bg-ink-deep/5">114 年</span>
-              <span class="px-3 py-1 rounded-full bg-ink-deep/5">心臟血管</span>
-              <span class="px-3 py-1 rounded-full bg-ink-deep/5">第 47 題</span>
+        <!-- Mock card with interactive scrub -->
+        <div class="demo-mock-wrap">
+          <div id="mock-card" class="pre-anim bg-white border border-warm rounded-3xl p-7 lg:p-8 shadow-card">
+            <div class="mock-meta flex flex-wrap gap-2 text-xs font-semibold text-ink-soft mb-4">
+              <span class="pill pre-anim px-3 py-1 rounded-full bg-ink-deep/5">114 年</span>
+              <span class="pill pre-anim px-3 py-1 rounded-full bg-ink-deep/5">心臟血管</span>
+              <span class="pill pre-anim px-3 py-1 rounded-full bg-ink-deep/5">第 47 題</span>
             </div>
-            <p class="text-base lg:text-lg text-ink-deep font-medium leading-relaxed">
+            <p id="mock-stem" class="pre-anim text-base lg:text-lg text-ink-deep font-medium leading-relaxed">
               65 歲男性突發胸痛 30 分鐘，ECG 顯示 II、III、aVF 導程 ST 段抬高，
               最可能的犯罪血管為何？
             </p>
 
             <div class="mt-5 space-y-2">
-              <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
+              <div class="mock-opt pre-anim flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
                 <span class="font-num font-bold text-sm w-7 h-7 rounded-full bg-ink-deep/5 text-ink-deep grid place-items-center">A</span>
                 <span class="text-sm">左前降支</span>
               </div>
-              <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
+              <div class="mock-opt pre-anim flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
                 <span class="font-num font-bold text-sm w-7 h-7 rounded-full bg-ink-deep/5 text-ink-deep grid place-items-center">B</span>
                 <span class="text-sm">左迴旋支</span>
               </div>
-              <div class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-mint bg-mint/10 text-ink-deep font-medium">
-                <span class="font-num font-bold text-sm w-7 h-7 rounded-full bg-mint text-white grid place-items-center">C</span>
+              <div id="mock-correct" class="mock-opt pre-anim flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
+                <span id="mock-letter-c" class="font-num font-bold text-sm w-7 h-7 rounded-full bg-ink-deep/5 text-ink-deep grid place-items-center">C</span>
                 <span class="text-sm">右冠狀動脈</span>
-                <span class="ml-auto text-mint font-bold">✓</span>
+                <span id="mock-check" class="ml-auto text-mint font-bold opacity-0">✓</span>
               </div>
-              <div class="flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
+              <div class="mock-opt pre-anim flex items-center gap-3 px-4 py-3 rounded-xl border border-warm text-ink-mid">
                 <span class="font-num font-bold text-sm w-7 h-7 rounded-full bg-ink-deep/5 text-ink-deep grid place-items-center">D</span>
                 <span class="text-sm">左主幹</span>
               </div>
             </div>
 
-            <div class="mt-5 bg-coral/8 border-l-4 border-coral rounded-r-lg px-4 py-3 text-sm text-ink-deep leading-relaxed">
+            <div id="mock-explain" class="pre-anim mt-5 bg-coral/8 border-l-4 border-coral rounded-r-lg px-4 py-3 text-sm text-ink-deep leading-relaxed" style="background: rgba(240, 140, 90, 0.08)">
               <strong class="text-coral">臨床重點 ·</strong> 下壁 STEMI（II/III/aVF）約 80% 來自右冠狀動脈閉塞，常合併右心室梗塞，禁用 nitrate。
             </div>
           </div>
@@ -483,60 +582,61 @@
     <!-- ============ TECH ============ -->
     <section class="py-20 lg:py-24">
       <div class="max-w-6xl mx-auto px-6 lg:px-8">
-        <div class="reveal text-center mb-10">
-          <div class="text-sm font-semibold text-coral tracking-[0.3em] uppercase">技術棧</div>
-          <h2 class="mt-3 text-3xl md:text-4xl font-black text-ink-deep">乾淨的開源實作</h2>
-          <p class="mt-4 text-ink-mid max-w-2xl mx-auto">
+        <div class="text-center mb-10">
+          <div id="tech-eyebrow" class="pre-anim text-sm font-semibold text-coral tracking-[0.3em] uppercase">技術棧</div>
+          <h2 id="tech-title" class="pre-anim mt-3 text-3xl md:text-4xl font-black text-ink-deep">乾淨的開源實作</h2>
+          <p id="tech-desc" class="pre-anim mt-4 text-ink-mid max-w-2xl mx-auto">
             前端 React 18 + Vite，題庫存 Supabase，部署 Vercel。所有原始碼開源在 GitHub。
           </p>
         </div>
 
-        <div class="reveal flex flex-wrap items-center justify-center gap-3 lg:gap-4">
-          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">React 18</span>
-          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Vite 5</span>
-          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Tailwind CSS 3</span>
-          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Supabase</span>
-          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">PWA · Workbox</span>
-          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Recharts</span>
-          <span class="bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">React Router 6</span>
+        <div id="tech-pills" class="flex flex-wrap items-center justify-center gap-3 lg:gap-4">
+          <span class="tech-pill pre-anim bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">React 18</span>
+          <span class="tech-pill pre-anim bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Vite 5</span>
+          <span class="tech-pill pre-anim bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Tailwind CSS 3</span>
+          <span class="tech-pill pre-anim bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Supabase</span>
+          <span class="tech-pill pre-anim bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">PWA · Workbox</span>
+          <span class="tech-pill pre-anim bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">Recharts</span>
+          <span class="tech-pill pre-anim bg-white border border-warm px-5 py-2.5 rounded-full text-sm font-semibold text-ink-deep">React Router 6</span>
         </div>
       </div>
     </section>
 
     <!-- ============ FINAL CTA ============ -->
-    <section class="py-20 lg:py-32 relative overflow-hidden">
+    <section class="final-cta py-20 lg:py-32 relative overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-b from-cream via-white/40 to-cream"></div>
       <div class="max-w-4xl mx-auto px-6 lg:px-8 relative text-center">
-        <div class="reveal">
-          <div class="text-sm font-semibold text-ink-soft tracking-[0.3em] uppercase">準備好了嗎</div>
-          <h2 class="mt-4 text-5xl md:text-7xl lg:text-8xl font-black text-ink-deep leading-none tracking-tight">
-            立即<span class="text-coral">開始刷題</span>
-          </h2>
-          <p class="mt-6 text-lg lg:text-xl text-ink-mid">
-            完全免費、無廣告、開源。打開瀏覽器就能用，支援 PWA 離線。
-          </p>
+        <div id="cta-eyebrow" class="pre-anim text-sm font-semibold text-ink-soft tracking-[0.3em] uppercase">準備好了嗎</div>
+        <h2 id="cta-title" class="pre-anim mt-4 text-5xl md:text-7xl lg:text-8xl font-black text-ink-deep leading-none tracking-tight">
+          立即<span class="text-coral">開始刷題</span>
+        </h2>
+        <p id="cta-desc" class="pre-anim mt-6 text-lg lg:text-xl text-ink-mid">
+          完全免費、無廣告、開源。打開瀏覽器就能用，支援 PWA 離線。
+        </p>
 
-          <div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <a
-              href="https://er-quiz-app-v2.vercel.app"
-              target="_blank"
-              rel="noopener"
-              class="breath inline-flex items-center gap-3 bg-coral text-white text-xl font-bold px-10 py-5 rounded-full shadow-cta hover:shadow-cardHover transition"
-            >
+        <div id="cta-button-wrap" class="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <a
+            id="cta-button"
+            href="https://er-quiz-app-v2.vercel.app"
+            target="_blank"
+            rel="noopener"
+            class="pre-anim magnetic cta-glow inline-flex items-center gap-3 bg-coral text-white text-xl font-bold px-10 py-5 rounded-full shadow-cta hover:shadow-ctaHover transition"
+          >
+            <span class="magnetic-inner flex items-center gap-3">
               er-quiz-app-v2.vercel.app
               <span class="text-2xl">→</span>
-            </a>
-          </div>
-          <div class="mt-6 text-sm text-ink-soft font-num">
-            或在 GitHub fork 一份：
-            <a
-              href="https://github.com/agoodbear/er-quiz-app-v2"
-              target="_blank"
-              rel="noopener"
-              class="font-semibold text-ink-deep hover:text-coral underline-offset-4 hover:underline"
-              >agoodbear/er-quiz-app-v2</a
-            >
-          </div>
+            </span>
+          </a>
+        </div>
+        <div class="mt-6 text-sm text-ink-soft font-num">
+          或在 GitHub fork 一份：
+          <a
+            href="https://github.com/agoodbear/er-quiz-app-v2"
+            target="_blank"
+            rel="noopener"
+            class="font-semibold text-ink-deep hover:text-coral underline-offset-4 hover:underline"
+            >agoodbear/er-quiz-app-v2</a
+          >
         </div>
       </div>
     </section>
@@ -553,90 +653,332 @@
           <span>© 2026</span>
         </div>
         <div class="flex flex-wrap items-center gap-x-5 gap-y-1">
-          <a
-            href="https://er-quiz-app-v2.vercel.app"
-            target="_blank"
-            rel="noopener"
-            class="hover:text-ink-deep transition"
-            >App</a
-          >
-          <a
-            href="https://github.com/agoodbear/er-quiz-app-v2"
-            target="_blank"
-            rel="noopener"
-            class="hover:text-ink-deep transition"
-            >GitHub</a
-          >
-          <a
-            href="https://agoodbear.com"
-            target="_blank"
-            rel="noopener"
-            class="hover:text-ink-deep transition"
-            >急診熊心聲</a
-          >
+          <a href="https://er-quiz-app-v2.vercel.app" target="_blank" rel="noopener" class="hover:text-ink-deep transition">App</a>
+          <a href="https://github.com/agoodbear/er-quiz-app-v2" target="_blank" rel="noopener" class="hover:text-ink-deep transition">GitHub</a>
+          <a href="https://agoodbear.com" target="_blank" rel="noopener" class="hover:text-ink-deep transition">急診熊心聲</a>
         </div>
       </div>
     </footer>
 
-    <!-- ============ JS: scroll reveal + count up ============ -->
+    <!-- ============ ANIMATIONS — Linear/Stripe-grade ============ -->
     <script>
-      // 1. Scroll reveal
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (e.isIntersecting) {
-              e.target.classList.add("in");
-              io.unobserve(e.target);
-            }
-          }
-        },
-        { threshold: 0.12 },
-      );
-      document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+      gsap.registerPlugin(ScrollTrigger);
 
-      // 2. Count-up on stats with GSAP when section enters
-      const statsIO = new IntersectionObserver(
-        (entries, obs) => {
-          for (const e of entries) {
-            if (!e.isIntersecting) continue;
-            e.target.querySelectorAll("[data-count]").forEach((node) => {
-              const target = parseInt(node.dataset.count, 10);
+      // Honor reduced motion
+      const prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (prefersReduced) {
+        document.querySelectorAll(".pre-anim").forEach((el) => el.classList.remove("pre-anim"));
+      } else {
+        // ============ HERO ENTRANCE ============
+        const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+        heroTl
+          .to("#hero-eyebrow", { opacity: 1, y: 0, duration: 0.6, clearProps: "all" })
+          .from("#hero-eyebrow", { y: 20, duration: 0.6 }, 0)
+          .to(
+            ".hero-char",
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.9,
+              ease: "expo.out",
+              stagger: 0.06,
+            },
+            0.15,
+          )
+          .from(
+            ".hero-char",
+            { y: 90, duration: 0.9, ease: "expo.out", stagger: 0.06 },
+            0.15,
+          )
+          .to("#hero-rule", { opacity: 1, scaleX: 1, duration: 0.7, ease: "expo.out" }, 0.55)
+          .from("#hero-rule", { scaleX: 0, duration: 0.7, ease: "expo.out" }, 0.55)
+          .to("#hero-tag", { opacity: 1, y: 0, duration: 0.7 }, 0.6)
+          .from("#hero-tag", { y: 30, duration: 0.7 }, 0.6)
+          .to(
+            "#hero-cta-primary, #hero-cta-secondary",
+            { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.5)", stagger: 0.08 },
+            0.85,
+          )
+          .from(
+            "#hero-cta-primary, #hero-cta-secondary",
+            { y: 30, scale: 0.9, duration: 0.7, ease: "back.out(1.5)", stagger: 0.08 },
+            0.85,
+          )
+          .to(
+            ".hero-trust",
+            { opacity: 1, y: 0, duration: 0.5, stagger: 0.06 },
+            1.05,
+          )
+          .from(".hero-trust", { y: 16, duration: 0.5, stagger: 0.06 }, 1.05)
+          .to(
+            "#hero-video",
+            { opacity: 1, y: 0, scale: 1, duration: 1.0, ease: "expo.out" },
+            1.15,
+          )
+          .from(
+            "#hero-video",
+            { y: 60, scale: 0.95, duration: 1.0, ease: "expo.out" },
+            1.15,
+          );
+
+        // ============ HERO VIDEO PARALLAX TILT ============
+        const videoFrame = document.querySelector("#hero-video");
+        if (videoFrame) {
+          const heroSection = document.querySelector("header");
+          let tiltActive = false;
+          const onMove = (e) => {
+            if (!tiltActive) return;
+            const rect = heroSection.getBoundingClientRect();
+            const xRatio = (e.clientX - rect.left) / rect.width - 0.5;
+            const yRatio = (e.clientY - rect.top) / rect.height - 0.5;
+            gsap.to(videoFrame, {
+              rotationX: yRatio * -5,
+              rotationY: xRatio * 6,
+              transformPerspective: 1200,
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          };
+          heroSection.addEventListener("mouseenter", () => (tiltActive = true));
+          heroSection.addEventListener("mouseleave", () => {
+            tiltActive = false;
+            gsap.to(videoFrame, {
+              rotationX: 0,
+              rotationY: 0,
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          });
+          heroSection.addEventListener("mousemove", onMove);
+        }
+
+        // ============ BLOB MOUSE PARALLAX ============
+        const blob1 = document.querySelector(".blob-1");
+        const blob2 = document.querySelector(".blob-2");
+        window.addEventListener("mousemove", (e) => {
+          const cx = e.clientX - window.innerWidth / 2;
+          const cy = e.clientY - window.innerHeight / 2;
+          if (blob1) {
+            gsap.to(blob1, { x: cx * 0.04, y: cy * 0.04, duration: 1.2, ease: "power2.out" });
+          }
+          if (blob2) {
+            gsap.to(blob2, { x: cx * -0.03, y: cy * -0.03, duration: 1.5, ease: "power2.out" });
+          }
+        });
+
+        // ============ STATS ============
+        ScrollTrigger.create({
+          trigger: "#stats",
+          start: "top 75%",
+          once: true,
+          onEnter: () => {
+            const stTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            stTl
+              .to("#stats-eyebrow", { opacity: 1, y: 0, duration: 0.5 })
+              .from("#stats-eyebrow", { y: 20, duration: 0.5 }, 0)
+              .to("#stats-title", { opacity: 1, y: 0, duration: 0.7 }, 0.1)
+              .from("#stats-title", { y: 40, duration: 0.7 }, 0.1)
+              .to(
+                ".stat-card",
+                { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.5)", stagger: 0.12 },
+                0.3,
+              )
+              .from(
+                ".stat-card",
+                { y: 50, scale: 0.92, duration: 0.7, ease: "back.out(1.5)", stagger: 0.12 },
+                0.3,
+              );
+
+            // Number count-up
+            document.querySelectorAll("[data-count]").forEach((el, i) => {
+              const target = parseInt(el.dataset.count, 10);
               const proxy = { v: 0 };
               gsap.to(proxy, {
                 v: target,
                 duration: 1.6,
+                delay: 0.4 + i * 0.12,
                 ease: "power2.out",
                 onUpdate: () =>
-                  (node.textContent = Math.round(proxy.v).toLocaleString("en-US")),
+                  (el.textContent = Math.round(proxy.v).toLocaleString("en-US")),
               });
             });
-            obs.unobserve(e.target);
-          }
-        },
-        { threshold: 0.4 },
-      );
-      const statsSection = document.querySelector("section.py-16, section.lg\\:py-24");
-      // safer selector
-      const statsRoot = document.querySelector("[data-count]")?.closest("section");
-      if (statsRoot) statsIO.observe(statsRoot);
+          },
+        });
 
-      // 3. Hero entrance with GSAP (snappier than CSS reveal for above-the-fold)
-      window.addEventListener("DOMContentLoaded", () => {
-        const heroReveals = document.querySelectorAll("header .reveal");
-        // GSAP overrides the CSS transition for hero only
-        heroReveals.forEach((el, i) => {
-          gsap.fromTo(
-            el,
-            { y: 24, opacity: 0 },
+        // ============ FEATURES — 3D entrance ============
+        ScrollTrigger.create({
+          trigger: "#features",
+          start: "top 70%",
+          once: true,
+          onEnter: () => {
+            const fTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            fTl
+              .to("#feat-eyebrow", { opacity: 1, y: 0, duration: 0.5 })
+              .from("#feat-eyebrow", { y: 20, duration: 0.5 }, 0)
+              .to("#feat-title", { opacity: 1, y: 0, duration: 0.7 }, 0.1)
+              .from("#feat-title", { y: 40, duration: 0.7 }, 0.1)
+              .to("#feat-desc", { opacity: 1, y: 0, duration: 0.6 }, 0.25)
+              .from("#feat-desc", { y: 30, duration: 0.6 }, 0.25)
+              .to(
+                ".feat",
+                {
+                  opacity: 1,
+                  y: 0,
+                  rotateY: 0,
+                  duration: 0.85,
+                  ease: "power3.out",
+                  stagger: 0.08,
+                },
+                0.4,
+              )
+              .from(
+                ".feat",
+                {
+                  y: 60,
+                  rotateY: -18,
+                  transformPerspective: 1000,
+                  duration: 0.85,
+                  ease: "power3.out",
+                  stagger: 0.08,
+                },
+                0.4,
+              );
+          },
+        });
+
+        // ============ DEMO — sticky scrub interaction ============
+        // Step 1: Text + bullet entrance (regular trigger)
+        ScrollTrigger.create({
+          trigger: "#demo",
+          start: "top 70%",
+          once: true,
+          onEnter: () => {
+            gsap.to("#demo-eyebrow", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" });
+            gsap.from("#demo-eyebrow", { y: 20, duration: 0.5, ease: "power3.out" });
+            gsap.to("#demo-title", { opacity: 1, y: 0, duration: 0.7, delay: 0.1, ease: "power3.out" });
+            gsap.from("#demo-title", { y: 40, duration: 0.7, delay: 0.1, ease: "power3.out" });
+            gsap.to("#demo-desc", { opacity: 1, y: 0, duration: 0.6, delay: 0.25, ease: "power3.out" });
+            gsap.from("#demo-desc", { y: 30, duration: 0.6, delay: 0.25, ease: "power3.out" });
+            gsap.to(".demo-bullet", { opacity: 1, x: 0, duration: 0.5, stagger: 0.1, delay: 0.35, ease: "power3.out" });
+            gsap.from(".demo-bullet", { x: -20, duration: 0.5, stagger: 0.1, delay: 0.35, ease: "power3.out" });
+          },
+        });
+
+        // Step 2: Mock card scrub-based answer reveal
+        const mockTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: "#demo",
+            start: "top 60%",
+            end: "bottom 40%",
+            scrub: 0.6,
+          },
+        });
+        mockTl
+          .to("#mock-card", { opacity: 1, x: 0, scale: 1, duration: 1 })
+          .from("#mock-card", { x: 60, scale: 0.94, duration: 1 }, 0)
+          .to(".mock-meta .pill", { opacity: 1, y: 0, duration: 0.4, stagger: 0.06 }, 0.4)
+          .from(".mock-meta .pill", { y: 12, duration: 0.4, stagger: 0.06 }, 0.4)
+          .to("#mock-stem", { opacity: 1, y: 0, duration: 0.5 }, 0.7)
+          .from("#mock-stem", { y: 20, duration: 0.5 }, 0.7)
+          .to(".mock-opt", { opacity: 1, x: 0, duration: 0.4, stagger: 0.1 }, 1.0)
+          .from(".mock-opt", { x: -24, duration: 0.4, stagger: 0.1 }, 1.0)
+          // Hover-style mark on B (red flicker), then commit C
+          .fromTo(
+            "#mock-correct",
             {
-              y: 0,
-              opacity: 1,
-              duration: 0.9,
-              ease: "power3.out",
-              delay: i * 0.08,
-              onComplete: () => el.classList.add("in"),
+              backgroundColor: "rgba(255,255,255,0)",
+              borderColor: "#E8DFD0",
+              color: "#5A6478",
             },
-          );
+            {
+              backgroundColor: "rgba(107, 170, 130, 0.12)",
+              borderColor: "#6BAA82",
+              borderWidth: "2px",
+              color: "#1E3A5F",
+              fontWeight: 500,
+              duration: 0.6,
+            },
+            1.6,
+          )
+          .fromTo(
+            "#mock-letter-c",
+            { backgroundColor: "rgba(30, 58, 95, 0.05)", color: "#1E3A5F" },
+            { backgroundColor: "#6BAA82", color: "#FFFFFF", duration: 0.5 },
+            1.6,
+          )
+          .to("#mock-check", { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, 1.9)
+          .from("#mock-check", { scale: 0, rotation: -90, duration: 0.4, ease: "back.out(2)" }, 1.9)
+          .to("#mock-explain", { opacity: 1, y: 0, duration: 0.5 }, 2.2)
+          .from("#mock-explain", { y: 24, duration: 0.5 }, 2.2);
+
+        // ============ TECH PILLS ============
+        ScrollTrigger.create({
+          trigger: "#tech-pills",
+          start: "top 80%",
+          once: true,
+          onEnter: () => {
+            gsap.to("#tech-eyebrow", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" });
+            gsap.from("#tech-eyebrow", { y: 20, duration: 0.5, ease: "power3.out" });
+            gsap.to("#tech-title", { opacity: 1, y: 0, duration: 0.6, delay: 0.1, ease: "power3.out" });
+            gsap.from("#tech-title", { y: 40, duration: 0.6, delay: 0.1, ease: "power3.out" });
+            gsap.to("#tech-desc", { opacity: 1, y: 0, duration: 0.5, delay: 0.2, ease: "power3.out" });
+            gsap.from("#tech-desc", { y: 30, duration: 0.5, delay: 0.2, ease: "power3.out" });
+            gsap.to(
+              ".tech-pill",
+              { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.06, delay: 0.3, ease: "back.out(1.5)" },
+            );
+            gsap.from(
+              ".tech-pill",
+              { y: 16, scale: 0.85, duration: 0.5, stagger: 0.06, delay: 0.3, ease: "back.out(1.5)" },
+            );
+          },
+        });
+
+        // ============ FINAL CTA ============
+        ScrollTrigger.create({
+          trigger: ".final-cta",
+          start: "top 75%",
+          once: true,
+          onEnter: () => {
+            const cTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+            cTl
+              .to("#cta-eyebrow", { opacity: 1, y: 0, duration: 0.5 })
+              .from("#cta-eyebrow", { y: 20, duration: 0.5 }, 0)
+              .to("#cta-title", { opacity: 1, y: 0, duration: 1, ease: "expo.out" }, 0.15)
+              .from("#cta-title", { y: 70, duration: 1, ease: "expo.out" }, 0.15)
+              .to("#cta-desc", { opacity: 1, y: 0, duration: 0.6 }, 0.5)
+              .from("#cta-desc", { y: 30, duration: 0.6 }, 0.5)
+              .to(
+                "#cta-button",
+                { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.5)" },
+                0.7,
+              )
+              .from(
+                "#cta-button",
+                { y: 50, scale: 0.85, duration: 0.8, ease: "back.out(1.5)" },
+                0.7,
+              );
+          },
+        });
+      } // end !prefersReduced
+
+      // ============ MAGNETIC BUTTONS (always on) ============
+      document.querySelectorAll(".magnetic").forEach((el) => {
+        const inner = el.querySelector(".magnetic-inner") || el;
+        let raf;
+        el.addEventListener("mousemove", (e) => {
+          const rect = el.getBoundingClientRect();
+          const x = e.clientX - rect.left - rect.width / 2;
+          const y = e.clientY - rect.top - rect.height / 2;
+          gsap.to(el, { x: x * 0.15, y: y * 0.15, duration: 0.4, ease: "power2.out" });
+          gsap.to(inner, { x: x * 0.08, y: y * 0.08, duration: 0.4, ease: "power2.out" });
+        });
+        el.addEventListener("mouseleave", () => {
+          gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.4)" });
+          gsap.to(inner, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1, 0.4)" });
         });
       });
     </script>

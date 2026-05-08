@@ -8,6 +8,8 @@ promo-video/.hyperframes/
 # Landing dev artefacts
 landing/screenshots/
 landing/_screenshot.mjs
+landing/_record.mjs
+landing/_frames/
 
 # Editor
 .DS_Store
