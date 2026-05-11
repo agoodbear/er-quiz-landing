@@ -148,6 +148,23 @@
         letter-spacing: 0.1em;
         margin-top: 4px;
       }
+      .s1-byline {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-top: 24px;
+      }
+      .s1-byline-by {
+        font-size: 26px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        letter-spacing: 0.04em;
+      }
+      .s1-byline-img {
+        height: 56px;
+        width: auto;
+        display: block;
+      }
 
       /* === Scene 2: Numbers === */
       #s2 .scene-content {
@@ -480,6 +497,10 @@
           <div class="s1-rule" id="s1-rule"></div>
           <h1 class="s1-title" id="s1-title">急專<span class="accent">大補帖</span></h1>
           <p class="s1-tag" id="s1-tag">把 21 年題庫整理成你看得懂的版本</p>
+          <div class="s1-byline" id="s1-byline">
+            <span class="s1-byline-by">by</span>
+            <img class="s1-byline-img" src="assets/bear-mascot.png" alt="急診熊心聲" />
+          </div>
         </div>
         <div class="s1-stamp" id="s1-stamp">
           <div class="stamp-num">v2</div>
@@ -659,6 +680,11 @@
         "#s1-stamp",
         { scale: 0, rotation: -180, opacity: 0, duration: 0.7, ease: "back.out(1.6)" },
         1.4,
+      );
+      tl.from(
+        "#s1-byline",
+        { y: 24, opacity: 0, duration: 0.5, ease: "power3.out" },
+        1.7,
       );
 
       /* ===================== Scene 2 (5.0 - 11.4s) ===================== */
