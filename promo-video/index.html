@@ -109,6 +109,12 @@
       .s1-title .accent {
         color: var(--coral);
       }
+      .s1-title-img {
+        height: 220px;
+        width: auto;
+        display: block;
+        user-select: none;
+      }
       .s1-tag {
         font-size: 42px;
         font-weight: 500;
@@ -495,8 +501,8 @@
             <span>急診專科 · 國考準備</span>
           </div>
           <div class="s1-rule" id="s1-rule"></div>
-          <h1 class="s1-title" id="s1-title">急專<span class="accent">大補帖</span></h1>
-          <p class="s1-tag" id="s1-tag">把 21 年題庫整理成你看得懂的版本</p>
+          <img class="s1-title-img" id="s1-title-img" src="assets/quiz-book-logo.png" alt="急專大補帖" />
+          <p class="s1-tag" id="s1-tag">把 22 年題庫整理成你看得懂的版本</p>
           <div class="s1-byline" id="s1-byline">
             <span class="s1-byline-by">by</span>
             <img class="s1-byline-img" src="assets/bear-mascot.png" alt="急診熊心聲" />
@@ -520,16 +526,16 @@
         <div class="scene-content">
           <div class="s2-eyebrow" id="s2-eyebrow">資料規模</div>
           <h2 class="s2-headline" id="s2-headline">
-            21 年題庫，每題都附四段式詳解
+            22 年題庫，每題都附四段式詳解
           </h2>
           <div class="s2-grid">
             <div class="stat-card" id="s2-card-1">
-              <div class="stat-num" id="s2-n1">2,713<span class="unit">題</span></div>
+              <div class="stat-num" id="s2-n1">2,913<span class="unit">題</span></div>
               <div class="stat-label">完整考古題</div>
             </div>
             <div class="stat-card" id="s2-card-2">
-              <div class="stat-num" id="s2-n2">21<span class="unit">年</span></div>
-              <div class="stat-label">94 - 114 年覆蓋</div>
+              <div class="stat-num" id="s2-n2">22<span class="unit">年</span></div>
+              <div class="stat-label">94 - 115 年覆蓋</div>
             </div>
             <div class="stat-card" id="s2-card-3">
               <div class="stat-num" id="s2-n3">100<span class="unit">%</span></div>
@@ -619,7 +625,7 @@
           </div>
           <div class="s4-mock" id="s4-mock">
             <div class="mock-meta" id="m-meta">
-              <span class="pill">114 年</span>
+              <span class="pill">115 年</span>
               <span class="pill">心臟血管</span>
               <span class="pill">第 47 題</span>
             </div>
@@ -674,7 +680,7 @@
         { scaleX: 0, transformOrigin: "left center", duration: 0.6, ease: "expo.out" },
         0.5,
       );
-      tl.from("#s1-title", { y: 80, opacity: 0, duration: 0.9, ease: "expo.out" }, 0.6);
+      tl.from("#s1-title-img", { scale: 0.85, opacity: 0, transformOrigin: "center center", duration: 0.9, ease: "back.out(1.4)" }, 0.6);
       tl.from("#s1-tag", { y: 30, opacity: 0, duration: 0.6, ease: "power3.out" }, 1.0);
       tl.from(
         "#s1-stamp",
@@ -713,8 +719,8 @@
           },
         });
       };
-      tl.add(countUp("#s2-n1", 2713, 1.6, "題"), 6.5);
-      tl.add(countUp("#s2-n2", 21, 1.2, "年"), 6.7);
+      tl.add(countUp("#s2-n1", 2913, 1.6, "題"), 6.5);
+      tl.add(countUp("#s2-n2", 22, 1.2, "年"), 6.7);
       tl.add(countUp("#s2-n3", 100, 1.4, "%"), 6.9);
 
       /* ===================== Scene 3 (11.0 - 22.5s) ===================== */
